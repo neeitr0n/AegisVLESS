@@ -7,15 +7,6 @@
   <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge" alt="Status">
 </p>
 
-```text
-    ___     ______   _______  _____  ______
-   /   |   / ____/  / ____/  / ___/ / ____/
-  / /| |  / __/    / / __    \__ \ / __/   
- / ___ | / /___   / /_/ /   ___/ // /___   
-/_/  |_|/_____/   \____/   /____//_____/   
-                                           
-```
-
 [English](#english) | [Русский](#русский)
 
 ---
