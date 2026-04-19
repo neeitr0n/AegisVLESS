@@ -1,12 +1,5 @@
 # AegisVLESS
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python">
-  <img src="https://img.shields.io/badge/OS-Linux-orange?style=for-the-badge&logo=linux" alt="OS">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge" alt="Status">
-</p>
-
 ```text
                                                                             
 ▄████▄ ▄▄▄▄▄  ▄▄▄▄ ▄▄  ▄▄▄▄   ██  ██ ██     ██████ ▄█████ ▄█████   
@@ -14,6 +7,13 @@
 ██  ██ ██▄▄▄ ▀███▀ ██ ▄▄██▀    ▀██▀  ██████ ██▄▄▄▄ █████▀ █████▀                                                      
                                            
 ```
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/OS-Linux-orange?style=for-the-badge&logo=linux" alt="OS">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge" alt="Status">
+</p>
 
 [English](#english) | [Русский](#русский)
 
