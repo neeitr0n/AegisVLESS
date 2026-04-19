@@ -1,94 +1,109 @@
 # AegisVLESS
 
-[Русская версия ниже](#русская-версия)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/OS-Linux-orange?style=for-the-badge&logo=linux" alt="OS">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge" alt="Status">
+</p>
 
-A standalone Python daemon and CLI tool for managing, automating, and dynamically rotating VLESS Reality configurations within X-UI panels. Aegis operates by directly interacting with the X-UI SQLite database, providing automated evasion techniques via SNI and port rotation without requiring manual panel intervention.
+[English](#english) | [Русский](#русский)
 
-## Core Features
+---
 
-* **Direct Database Mutation:** Modifies inbound proxies and network settings directly via `/etc/x-ui/x-ui.db`.
-* **Dynamic Rotation Engine:**
-    * **SNI Rotation:** Supports selection from a predefined pool via random assignment or lowest latency (ping) analysis.
-    * **Port Rotation:** Supports shifting between standard web ports (80, 443, etc.) or dynamic ephemeral ports (42000-65000).
-* **Systemd Integration:** Automatically deploys and manages itself as a background daemon (`aegis.service`).
-* **Firewall Automation:** Dynamically manages `ufw` rules to open new ports and close old ones during rotation cycles.
-* **Subscription Provisioning:** Automatically generates and serves VLESS links via a secure, randomized subscription path utilizing a built-in HTTP server.
-* **Self-Modifying Configuration:** Persists CLI menu state by rewriting its own variable definitions, eliminating the need for external `.json` dependencies.
+<a name="english"></a>
+## English
 
-## System Requirements
+A standalone Python daemon and CLI tool designed for automated management and dynamic rotation of **VLESS Reality** configurations within X-UI panels. Aegis eliminates manual intervention by interacting directly with the SQLite database to ensure high availability and censorship resistance.
 
-* **OS:** Any modern Linux distribution with systemd (Ubuntu, Debian, etc.)  
-* **Dependencies:** Python 3.x, `sqlite3`, `ufw`, `curl`
-* **Privileges:** `root` execution is strictly required (for `systemctl`, `ufw`, and database write access).
-* **Environment:** An existing and active X-UI panel (or fork like 3x-ui). 
-    * *Note:* The script expects the database to be located at `/etc/x-ui/x-ui.db` and uses the `x-ui restart` command.
+### 🛠 Architecture Flow
 
-## Installation & Usage
+```mermaid
+graph TD
+    A[Aegis Daemon] -->|Direct SQL Mutation| B[(X-UI SQLite DB)]
+    A -->|State Persistence| A
+    A -->|Port Management| C[UFW Firewall]
+    A -->|Automation| D[systemd Service]
+    A -->|API Delivery| E[Secure Subscription Server]
+    B -->|Update| F[VLESS Reality Inbound]
+```
 
-1. **Download the script:**
-   Ensure the script is placed in a directory where it has read/write permissions, as it updates its own configuration variables.
+### 🚀 Key Features
+
+- **Database-Level Integration:** Modifies `/etc/x-ui/x-ui.db` directly for zero-latency updates.
+- **Intelligent SNI Rotation:** - `best_ping`: Automatic selection based on lowest latency.
+  - `random_sni`: Randomized selection from a vetted pool.
+- **Port Shifting:** Toggle between standard web ports (80, 443) and dynamic ephemeral ranges (42k-65k).
+- **Self-Healing Firewall:** Automatic `ufw` rule updates synchronized with port rotation.
+- **Stateless Configuration:** Zero external `.json` dependencies; state is maintained within the binary logic.
+
+### 📦 Installation
+
+```bash
+git clone https://github.com/neeitr0n/AegisVLESS.git
+cd AegisVLESS
+chmod +x aegis_surgeon.py
+```
+
+### ⚙️ Usage
+
+1. **Initial Setup:**
    ```bash
-   wget -O aegis.py <raw_github_url>
-   chmod +x aegis.py
+   sudo python3 aegis_surgeon.py
    ```
-
-2. **Initial Setup & CLI Menu:**
-   Run the script with root privileges to access the configuration menu.
-   ```bash
-   sudo python3 aegis.py
-   ```
-
-3. **Service Management:**
-   Once configured, use the CLI menu to install and start the background service. You can monitor the daemon via standard systemd commands:
+2. **Daemon Control:**
    ```bash
    sudo systemctl status aegis
-   sudo journalctl -u aegis -f
+   sudo journalctl -u aegis -f -n 50
    ```
 
 ---
 
-<a name="русская-версия"></a>
-# AegisVLESS (Русский)
+<a name="русский"></a>
+## Русский
 
-Автономный Python-daemon и CLI-утилита для управления, автоматизации и динамической ротации конфигураций VLESS Reality в панелях X-UI. Aegis работает напрямую с SQLite-базой данных X-UI, обеспечивая автоматизированный обход блокировок с помощью ротации SNI и портов без необходимости ручного вмешательства через веб-интерфейс.
+Автономный Python-демон и CLI-утилита для автоматизированного управления и динамической ротации конфигураций **VLESS Reality** в панелях X-UI. Aegis исключает необходимость ручной настройки, взаимодействуя напрямую с базой данных SQLite для обеспечения максимальной скрытности и обхода блокировок.
 
-## Основные возможности
+### 🌟 Основные возможности
 
-* **Прямое взаимодействие с БД:** Модификация входящих прокси и сетевых настроек напрямую через `/etc/x-ui/x-ui.db`.
-* **Движок динамической ротации:**
-    * **Ротация SNI:** Поддержка выбора из заданного пула случайным образом или на основе анализа минимальной задержки (ping).
-    * **Ротация портов:** Переключение между стандартными веб-портами (80, 443 и т.д.) или динамическими портами (42000-65000).
-* **Интеграция с systemd:** Автоматическое развертывание и управление в виде фонового процесса (`aegis.service`).
-* **Управление фаерволом:** Динамическое управление правилами `ufw` для открытия новых портов и закрытия старых в процессе ротации.
-* **Генерация подписок:** Встроенный HTTP-сервер для раздачи актуальных VLESS-ссылок по защищенному рандомизированному пути.
-* **Самомодифицируемая конфигурация:** Сохранение состояния CLI-меню путем перезаписи собственных переменных в коде, что исключает зависимость от внешних файлов `.json`.
+- **Прямая модификация БД:** Работа с `/etc/x-ui/x-ui.db` для мгновенного обновления настроек без перезапуска всей панели.
+- **Умная ротация SNI:**
+  - `best_ping`: Автоматический выбор домена с минимальной задержкой.
+  - `random_sni`: Случайный выбор из пула проверенных доменов.
+- **Гибкие порты:** Поддержка стандартных веб-портов (80, 443 и др.) или динамического диапазона (42000-65000).
+- **Автоматизация UFW:** Синхронное открытие новых и закрытие старых портов в фаерволе.
+- **Subscription Server:** Встроенный сервер для раздачи актуальных ссылок по защищенному пути.
 
-## Системные требования
+### 📂 Структура проекта
 
-* **ОС:** Любой современный дистрибутив Linux с поддержкой systemd (Ubuntu, Debian и др.)
-* **Зависимости:** Python 3.x, `sqlite3`, `ufw`, `curl`
-* **Права:** Строго требуется запуск от имени `root` (для `systemctl`, `ufw` и записи в БД).
-* **Окружение:** Установленная и работающая панель X-UI (или форк, например 3x-ui). 
-    * *Примечание:* Скрипт ожидает, что база данных находится по пути `/etc/x-ui/x-ui.db`, и использует системную команду `x-ui restart`.
+```text
+.
+├── aegis_surgeon.py    # Основная логика и CLI меню
+├── README.md           # Документация проекта
+└── .gitignore          # Исключения Git
+```
 
-## Установка и использование
+### 🛠 Системные требования
 
-1. **Загрузка скрипта:**
-   Убедитесь, что скрипт находится в директории с правами на чтение и запись, так как он обновляет собственные конфигурационные переменные.
-   ```bash
-   wget -O aegis.py <raw_github_url>
-   chmod +x aegis.py
-   ```
+- **ОС:** Linux дистрибутивы с поддержкой `systemd` (Ubuntu 20.04+, Debian 11+).
+- **Зависимости:** Python 3.8+, `sqlite3`, `ufw`, `curl`, `git`.
+- **Права:** Требуется запуск от имени `root`.
 
-2. **Первичная настройка и CLI меню:**
-   Запустите скрипт с правами root для доступа к конфигурационному меню.
-   ```bash
-   sudo python3 aegis.py
-   ```
+### 🔗 Проверенный пул SNI
 
-3. **Управление службой:**
-   После конфигурации используйте меню CLI для установки и запуска фоновой службы. Мониторинг демона осуществляется стандартными командами systemd:
-   ```bash
-   sudo systemctl status aegis
-   sudo journalctl -u aegis -f
-   ```
+<details>
+<summary>Нажмите, чтобы развернуть список доменов</summary>
+
+- debian.org
+- kernel.org
+- python.org
+- cloudflare.com
+- microsoft.com
+- wikipedia.org
+- *и еще 55+ проверенных доменов с поддержкой TLS 1.3 и H2*
+</details>
+
+---
+
+### ⚠️ Disclaimer
+This tool is for educational purposes only. The author is not responsible for any misuse or damages caused by this software.
