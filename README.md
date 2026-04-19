@@ -1,4 +1,4 @@
-# Aegis VLESS
+# AegisVLESS
 
 [Русская версия ниже](#русская-версия)
 
@@ -48,7 +48,7 @@ A standalone Python daemon and CLI tool for managing, automating, and dynamicall
 ---
 
 <a name="русская-версия"></a>
-# Aegis VLESS (Русский)
+# AegisVLESS (Русский)
 
 Автономный Python-daemon и CLI-утилита для управления, автоматизации и динамической ротации конфигураций VLESS Reality в панелях X-UI. Aegis работает напрямую с SQLite-базой данных X-UI, обеспечивая автоматизированный обход блокировок с помощью ротации SNI и портов без необходимости ручного вмешательства через веб-интерфейс.
 
