@@ -1,4 +1,4 @@
-# Aegis Surgeon
+# AegisVLESS
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python">
@@ -8,49 +8,28 @@
 </p>
 
 ```text
-                                                                                                                                                                                                               
-                                                                                                                                                                                                               
-               AAA                                                      iiii               VVVVVVVV           VVVVVVVVLLLLLLLLLLL             EEEEEEEEEEEEEEEEEEEEEE   SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS      
-              A:::A                                                    i::::i              V::::::V           V::::::VL:::::::::L             E::::::::::::::::::::E SS:::::::::::::::S SS:::::::::::::::S     
-             A:::::A                                                    iiii               V::::::V           V::::::VL:::::::::L             E::::::::::::::::::::ES:::::SSSSSS::::::SS:::::SSSSSS::::::S     
-            A:::::::A                                                                      V::::::V           V::::::VLL:::::::LL             EE::::::EEEEEEEEE::::ES:::::S     SSSSSSSS:::::S     SSSSSSS     
-           A:::::::::A            eeeeeeeeeeee       ggggggggg   gggggiiiiiii     ssssssssssV:::::V           V:::::V   L:::::L                 E:::::E       EEEEEES:::::S            S:::::S                 
-          A:::::A:::::A         ee::::::::::::ee    g:::::::::ggg::::gi:::::i   ss::::::::::sV:::::V         V:::::V    L:::::L                 E:::::E             S:::::S            S:::::S                 
-         A:::::A A:::::A       e::::::eeeee:::::ee g:::::::::::::::::g i::::i ss:::::::::::::sV:::::V       V:::::V     L:::::L                 E::::::EEEEEEEEEE    S::::SSSS          S::::SSSS              
-        A:::::A   A:::::A     e::::::e     e:::::eg::::::ggggg::::::gg i::::i s::::::ssss:::::sV:::::V     V:::::V      L:::::L                 E:::::::::::::::E     SS::::::SSSSS      SS::::::SSSSS         
-       A:::::A     A:::::A    e:::::::eeeee::::::eg:::::g     g:::::g  i::::i  s:::::s  ssssss  V:::::V   V:::::V       L:::::L                 E:::::::::::::::E       SSS::::::::SS      SSS::::::::SS       
-      A:::::AAAAAAAAA:::::A   e:::::::::::::::::e g:::::g     g:::::g  i::::i    s::::::s        V:::::V V:::::V        L:::::L                 E::::::EEEEEEEEEE          SSSSSS::::S        SSSSSS::::S      
-     A:::::::::::::::::::::A  e::::::eeeeeeeeeee  g:::::g     g:::::g  i::::i       s::::::s      V:::::V:::::V         L:::::L                 E:::::E                         S:::::S            S:::::S     
-    A:::::AAAAAAAAAAAAA:::::A e:::::::e           g::::::g    g:::::g  i::::i ssssss   s:::::s     V:::::::::V          L:::::L         LLLLLL  E:::::E       EEEEEE            S:::::S            S:::::S     
-   A:::::A             A:::::Ae::::::::e          g:::::::ggggg:::::g i::::::is:::::ssss::::::s     V:::::::V         LL:::::::LLLLLLLLL:::::LEE::::::EEEEEEEE:::::ESSSSSSS     S:::::SSSSSSSS     S:::::S     
-  A:::::A               A:::::Ae::::::::eeeeeeee   g::::::::::::::::g i::::::is::::::::::::::s       V:::::V          L::::::::::::::::::::::LE::::::::::::::::::::ES::::::SSSSSS:::::SS::::::SSSSSS:::::S     
- A:::::A                 A:::::Aee:::::::::::::e    gg::::::::::::::g i::::::i s:::::::::::ss         V:::V           L::::::::::::::::::::::LE::::::::::::::::::::ES:::::::::::::::SS S:::::::::::::::SS      
-AAAAAAA                   AAAAAAA eeeeeeeeeeeeee      gggggggg::::::g iiiiiiii  sssssssssss            VVV            LLLLLLLLLLLLLLLLLLLLLLLLEEEEEEEEEEEEEEEEEEEEEE SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS        
-                                                              g:::::g                                                                                                                                          
-                                                  gggggg      g:::::g                                                                                                                                          
-                                                  g:::::gg   gg:::::g                                                                                                                                          
-                                                   g::::::ggg:::::::g                                                                                                                                          
-                                                    gg:::::::::::::g                                                                                                                                           
-                                                      ggg::::::ggg                                                                                                                                             
-                                                         gggggg                                                                                                                                                
-   
+    ___     ______   _______  _____  ______
+   /   |   / ____/  / ____/  / ___/ / ____/
+  / /| |  / __/    / / __    \__ \ / __/   
+ / ___ | / /___   / /_/ /   ___/ // /___   
+/_/  |_|/_____/   \____/   /____//_____/   
                                            
 ```
 
-[English](#english) | [Русский](#русский)
+---
+
+### 📖 Description / Описание
+
+**EN:** A standalone Python daemon and CLI tool for automated management and dynamic rotation of VLESS Reality configurations in X-UI panels. It interacts directly with the SQLite database to ensure censorship resistance.
+**RU:** Автономный Python-демон и CLI-утилита для автоматического управления и динамической ротации конфигураций VLESS Reality в панелях X-UI. Взаимодействует напрямую с БД SQLite для обеспечения обхода блокировок.
 
 ---
 
-<a name="english"></a>
-## English
-
-A standalone Python daemon and CLI tool designed for automated management and dynamic rotation of **VLESS Reality** configurations within X-UI panels. Aegis eliminates manual intervention by interacting directly with the SQLite database to ensure high availability and censorship resistance.
-
-### 🛠 Architecture Flow
+### 🛠 Architecture Flow / Архитектура
 
 ```mermaid
 graph TD
-    A[Aegis Daemon] -->|Direct SQL Mutation| B[(X-UI SQLite DB)]
+    A[AegisVLESS Daemon] -->|Direct SQL Mutation| B[(X-UI SQLite DB)]
     A -->|State Persistence| A
     A -->|Port Management| C[UFW Firewall]
     A -->|Automation| D[systemd Service]
@@ -58,82 +37,81 @@ graph TD
     B -->|Update| F[VLESS Reality Inbound]
 ```
 
-### 🚀 Key Features
+---
 
-- **Database-Level Integration:** Modifies `/etc/x-ui/x-ui.db` directly for zero-latency updates.
-- **Intelligent SNI Rotation:** - `best_ping`: Automatic selection based on lowest latency.
-  - `random_sni`: Randomized selection from a vetted pool.
-- **Port Shifting:** Toggle between standard web ports (80, 443) and dynamic ephemeral ranges (42k-65k).
-- **Self-Healing Firewall:** Automatic `ufw` rule updates synchronized with port rotation.
-- **Stateless Configuration:** Zero external `.json` dependencies; state is maintained within the binary logic.
+### 🚀 Key Features / Основные возможности
 
-### 📦 Installation
-
-```bash
-git clone https://github.com/neeitr0n/AegisVLESS.git
-cd AegisVLESS
-chmod +x aegis_surgeon.py
-```
-
-### ⚙️ Usage
-
-1. **Initial Setup:**
-   ```bash
-   sudo python3 aegis_surgeon.py
-   ```
-2. **Daemon Control:**
-   ```bash
-   sudo systemctl status aegis
-   sudo journalctl -u aegis -f -n 50
-   ```
+* **EN:** **Direct Database Mutation:** Modifies `/etc/x-ui/x-ui.db` directly for instant updates.
+    **RU:** **Прямая модификация БД:** Работа с `/etc/x-ui/x-ui.db` напрямую для мгновенного обновления настроек.
+* **EN:** **Dynamic Rotation:** Supports SNI rotation (best_ping/random) and Port shifting (standard/dynamic).
+    **RU:** **Динамическая ротация:** Поддержка ротации SNI (ping/random) и смены портов (стандартные/динамические).
+* **EN:** **Firewall Automation:** Automatically manages `ufw` rules during rotation cycles.
+    **RU:** **Автоматизация фаервола:** Автоматическое управление правилами `ufw` при смене портов.
+* **EN:** **Systemd Integration:** Runs as a background daemon with full logging support.
+    **RU:** **Интеграция с systemd:** Работает как фоновый демон с полной поддержкой логов.
+* **EN:** **Subscription Provisioning:** Built-in HTTP server for serving VLESS links via secure paths.
+    **RU:** **Сервер подписок:** Встроенный HTTP-сервер для раздачи VLESS-ссылок по защищенным путям.
 
 ---
 
-<a name="русский"></a>
-## Русский
+### 🛠 System Requirements / Системные требования
 
-Автономный Python-демон и CLI-утилита для автоматизированного управления и динамической ротации конфигураций **VLESS Reality** в панелях X-UI. Aegis исключает необходимость ручной настройки, взаимодействуя напрямую с базой данных SQLite для обеспечения максимальной скрытности и обхода блокировок.
+* **EN:** Linux distribution with `systemd` (Ubuntu 20.04+, Debian 11+).
+    **RU:** Linux дистрибутив с `systemd` (Ubuntu 20.04+, Debian 11+).
+* **EN:** Python 3.8+, `sqlite3`, `ufw`, `curl`, `git`.
+    **RU:** Python 3.8+, `sqlite3`, `ufw`, `curl`, `git`.
+* **EN:** Root privileges and an active X-UI panel installation.
+    **RU:** Права root и установленная панель X-UI.
 
-### 🌟 Основные возможности
+---
 
-- **Прямая модификация БД:** Работа с `/etc/x-ui/x-ui.db` для мгновенного обновления настроек без перезапуска всей панели.
-- **Умная ротация SNI:**
-  - `best_ping`: Автоматический выбор домена с минимальной задержкой.
-  - `random_sni`: Случайный выбор из пула проверенных доменов.
-- **Гибкие порты:** Поддержка стандартных веб-портов (80, 443 и др.) или динамического диапазона (42000-65000).
-- **Автоматизация UFW:** Синхронное открытие новых и закрытие старых портов в фаерволе.
-- **Subscription Server:** Встроенный сервер для раздачи актуальных ссылок по защищенному пути.
+### 📦 Installation & Usage / Установка и использование
 
-### 📂 Структура проекта
-
-```text
-.
-├── aegis_surgeon.py    # Основная логика и CLI меню
-├── README.md           # Документация проекта
-└── .gitignore          # Исключения Git
+**1. Clone & Prepare / Клонирование и подготовка:**
+```bash
+git clone https://github.com/neeitr0n/AegisVLESS.git
+cd AegisVLESS
+chmod +x aegis.py
 ```
 
-### 🛠 Системные требования
+**2. Run Setup / Запуск настройки:**
+```bash
+sudo python3 aegis.py
+```
 
-- **ОС:** Linux дистрибутивы с поддержкой `systemd` (Ubuntu 20.04+, Debian 11+).
-- **Зависимости:** Python 3.8+, `sqlite3`, `ufw`, `curl`, `git`.
-- **Права:** Требуется запуск от имени `root`.
+**3. Service Control / Управление службой:**
+```bash
+sudo systemctl status aegis
+sudo journalctl -u aegis -f
+```
 
-### 🔗 Проверенный пул SNI
+---
+
+### 🔗 SNI Pool / Пул доменов
 
 <details>
-<summary>Нажмите, чтобы развернуть список доменов</summary>
+<summary>View configured domains / Посмотреть список доменов</summary>
 
-- debian.org
-- kernel.org
+- rutube.ru
+- yandex.ru
+- vk.com
+- ozon.ru
+- ya.ru
+- wildberries.ru
 - python.org
-- cloudflare.com
 - microsoft.com
-- wikipedia.org
-- *и еще 55+ проверенных доменов с поддержкой TLS 1.3 и H2*
+- apple.com
+- samsung.com
+- oracle.com
+- pinterest.com
+- kernel.org
+- cisco.org
+- nvidia.com
+- amd.com
 </details>
 
 ---
 
 ### ⚠️ Disclaimer
-This tool is for educational purposes only. The author is not responsible for any misuse or damages caused by this software.
+**EN:** This tool is for educational purposes only. The author is not responsible for any misuse.
+**RU:** Этот инструмент предназначен только для образовательных целей. Автор не несет ответственности за любое нецелевое использование.
