@@ -7,6 +7,36 @@
   <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge" alt="Status">
 </p>
 
+```text
+                                                                                                                                                                                                               
+                                                                                                                                                                                                               
+               AAA                                                      iiii               VVVVVVVV           VVVVVVVVLLLLLLLLLLL             EEEEEEEEEEEEEEEEEEEEEE   SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS      
+              A:::A                                                    i::::i              V::::::V           V::::::VL:::::::::L             E::::::::::::::::::::E SS:::::::::::::::S SS:::::::::::::::S     
+             A:::::A                                                    iiii               V::::::V           V::::::VL:::::::::L             E::::::::::::::::::::ES:::::SSSSSS::::::SS:::::SSSSSS::::::S     
+            A:::::::A                                                                      V::::::V           V::::::VLL:::::::LL             EE::::::EEEEEEEEE::::ES:::::S     SSSSSSSS:::::S     SSSSSSS     
+           A:::::::::A            eeeeeeeeeeee       ggggggggg   gggggiiiiiii     ssssssssssV:::::V           V:::::V   L:::::L                 E:::::E       EEEEEES:::::S            S:::::S                 
+          A:::::A:::::A         ee::::::::::::ee    g:::::::::ggg::::gi:::::i   ss::::::::::sV:::::V         V:::::V    L:::::L                 E:::::E             S:::::S            S:::::S                 
+         A:::::A A:::::A       e::::::eeeee:::::ee g:::::::::::::::::g i::::i ss:::::::::::::sV:::::V       V:::::V     L:::::L                 E::::::EEEEEEEEEE    S::::SSSS          S::::SSSS              
+        A:::::A   A:::::A     e::::::e     e:::::eg::::::ggggg::::::gg i::::i s::::::ssss:::::sV:::::V     V:::::V      L:::::L                 E:::::::::::::::E     SS::::::SSSSS      SS::::::SSSSS         
+       A:::::A     A:::::A    e:::::::eeeee::::::eg:::::g     g:::::g  i::::i  s:::::s  ssssss  V:::::V   V:::::V       L:::::L                 E:::::::::::::::E       SSS::::::::SS      SSS::::::::SS       
+      A:::::AAAAAAAAA:::::A   e:::::::::::::::::e g:::::g     g:::::g  i::::i    s::::::s        V:::::V V:::::V        L:::::L                 E::::::EEEEEEEEEE          SSSSSS::::S        SSSSSS::::S      
+     A:::::::::::::::::::::A  e::::::eeeeeeeeeee  g:::::g     g:::::g  i::::i       s::::::s      V:::::V:::::V         L:::::L                 E:::::E                         S:::::S            S:::::S     
+    A:::::AAAAAAAAAAAAA:::::A e:::::::e           g::::::g    g:::::g  i::::i ssssss   s:::::s     V:::::::::V          L:::::L         LLLLLL  E:::::E       EEEEEE            S:::::S            S:::::S     
+   A:::::A             A:::::Ae::::::::e          g:::::::ggggg:::::g i::::::is:::::ssss::::::s     V:::::::V         LL:::::::LLLLLLLLL:::::LEE::::::EEEEEEEE:::::ESSSSSSS     S:::::SSSSSSSS     S:::::S     
+  A:::::A               A:::::Ae::::::::eeeeeeee   g::::::::::::::::g i::::::is::::::::::::::s       V:::::V          L::::::::::::::::::::::LE::::::::::::::::::::ES::::::SSSSSS:::::SS::::::SSSSSS:::::S     
+ A:::::A                 A:::::Aee:::::::::::::e    gg::::::::::::::g i::::::i s:::::::::::ss         V:::V           L::::::::::::::::::::::LE::::::::::::::::::::ES:::::::::::::::SS S:::::::::::::::SS      
+AAAAAAA                   AAAAAAA eeeeeeeeeeeeee      gggggggg::::::g iiiiiiii  sssssssssss            VVV            LLLLLLLLLLLLLLLLLLLLLLLLEEEEEEEEEEEEEEEEEEEEEE SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS        
+                                                              g:::::g                                                                                                                                          
+                                                  gggggg      g:::::g                                                                                                                                          
+                                                  g:::::gg   gg:::::g                                                                                                                                          
+                                                   g::::::ggg:::::::g                                                                                                                                          
+                                                    gg:::::::::::::g                                                                                                                                           
+                                                      ggg::::::ggg                                                                                                                                             
+                                                         gggggg                                                                                                                                                
+   
+                                           
+```
+
 [English](#english) | [Русский](#русский)
 
 ---
