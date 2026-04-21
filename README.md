@@ -15,8 +15,8 @@
   <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge" alt="Status">
 </p>
 
-> <b>Was this tool helpful? Give it a ⭐ as a "thank you"!</b>
-> <b>Инструмент был полезен? Поставь ⭐ в качестве «спасибо»!</b>
+> <b>Was this tool helpful? Give it a ⭐ as a "thank you"!</b><br>
+> <b>Инструмент был полезен? Поставь ⭐ в качестве «спасибо»!</b><br>
 [English](#english) | [Русский](#русский)
 
 ---
