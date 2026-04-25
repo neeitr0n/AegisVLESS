@@ -558,9 +558,9 @@ class Navigator:
         self.port_range = port_range
         self.max_attempts = max_attempts
         self.sni_pool = [
-            "rutube.ru", "yandex.ru", "vk.com", "ozon.ru", "ya.ru", "ozon.ru", "www.python.org",
-            "wildberries.ru", "www.microsoft.com", "www.apple.com", "www.samsung.com", "www.oracle.com",
-            "www.pinterest.com", "www.python.org", "www.kernel.org", "www.oracle.com", "www.cisco.org",
+            "rutube.ru", "yandex.ru", "ya.ru", "www.python.org",
+            "www.microsoft.com", "www.apple.com", "www.samsung.com", "www.oracle.com",
+            "www.pinterest.com", "www.python.org", "www.kernel.org", "www.cisco.org",
             "www.nvidia.com", "www.amd.com"
         ]
 
