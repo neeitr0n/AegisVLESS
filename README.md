@@ -142,10 +142,7 @@ graph TD
 
 - rutube.ru
 - yandex.ru
-- vk.com
-- ozon.ru
 - ya.ru
-- wildberries.ru
 - python.org
 - microsoft.com
 - apple.com
