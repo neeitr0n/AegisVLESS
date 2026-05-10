@@ -6,7 +6,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <script>
-    // Глобальная переменная для хранения переводов
     window.translations = {
         en: {
             title: "AegisVLESS Dashboard",
@@ -248,7 +247,6 @@ body::after {
     z-index: -1;
 }
 
-/* Добавляем max-height и overflow для прокрутки */
 .container {
     max-width: 960px;
     margin: auto;
@@ -269,7 +267,6 @@ body::after {
     overflow-y: auto;
 }
 
-/* Стили для скроллбара */
 .container::-webkit-scrollbar {
     width: 8px;
 }
@@ -424,7 +421,6 @@ body.light .link-box {
     color: #111827;
 }
 
-/* Кнопка копирования с плавным переливом */
 .copy-btn {
     position: relative;
     overflow: hidden;
@@ -436,10 +432,8 @@ body.light .link-box {
     font-weight: 600;
     min-width: 100px;
 
-    /* Плавные переходы для анимации цвета */
     transition: background 0.5s ease, box-shadow 0.5s ease, transform 0.15s ease;
 
-    /* Исходный фиолетовый градиент */
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: white;
     box-shadow:
@@ -462,9 +456,7 @@ body.light .link-box {
     transform: scale(0.97);
 }
 
-/* Состояние после копирования - плавный перелив в зеленый */
 .copy-btn.copied-state {
-    /* Плавный переход уже задан в основном классе */
     background: linear-gradient(135deg, #22c55e, #16a34a);
     box-shadow:
         0 4px 18px rgba(34, 197, 94, 0.4),
@@ -673,8 +665,6 @@ body.light .theme-btn:hover {
     }
 }
 
-/* --- НОВЫЙ КОД НИЖЕ --- */
-/* Для ПК (экраны шире 700px) убираем фиксированную высоту и скролл внутри контейнера */
 @media (min-width: 701px) {
     .container {
         max-height: none;
@@ -786,7 +776,6 @@ window.copyText = function(id, btnElement) {
         var span = btnElement.querySelector('span');
         var originalText = span ? span.innerText : btnElement.innerText;
 
-        // Добавляем класс для зеленого цвета - теперь с плавным переходом!
         btnElement.classList.add('copied-state');
 
         var lang = localStorage.getItem('aegisvless-lang') || 'en';
@@ -798,7 +787,6 @@ window.copyText = function(id, btnElement) {
             btnElement.innerText = t.copied;
         }
 
-        // Удаляем класс через 1.2 секунды
         setTimeout(function() {
             btnElement.classList.remove('copied-state');
             if (span) {
