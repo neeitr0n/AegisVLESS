@@ -1,4 +1,4 @@
-<img width="451" height="419" alt="2026-05-10_21-34" src="https://github.com/user-attachments/assets/aa1e0f53-8a78-45cf-bf20-1f5023bd7b67" />
+<img width="2255" height="865" alt="2026-05-10_21-36" src="https://github.com/user-attachments/assets/dacf3a34-3ab5-47a9-8fd5-a809dfcdaa7b" />
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python">
