@@ -1,0 +1,912 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AegisVLESS Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script>
+    // Глобальная переменная для хранения переводов
+    window.translations = {
+        en: {
+            title: "AegisVLESS Dashboard",
+            currentSni: "Current SNI",
+            currentPort: "Current Port",
+            sniMode: "SNI Selection Mode",
+            portMode: "Port Selection Mode",
+            subPath: "Subscription Path",
+            vlessLink: "VLESS Link",
+            subUrl: "Subscription URL",
+            copy: "Copy",
+            lastUpdated: "Last updated",
+            autoRefresh: "Auto-refresh: 15s",
+            theme: "Theme",
+            dark: "Dark",
+            light: "Light",
+            language: "Language",
+            copied: "Copied!",
+            dataUpdated: "Data updated!",
+            copyFailed: "Copy failed",
+            en: "🇬🇧 English",
+            ru: "🇷🇺 Русский",
+            zh: "🇨🇳 中文",
+            fa: "🇮🇷 فارسی"
+        },
+        ru: {
+            title: "Панель AegisVLESS",
+            currentSni: "Текущий SNI",
+            currentPort: "Текущий порт",
+            sniMode: "Режим выбора SNI",
+            portMode: "Режим выбора порта",
+            subPath: "Путь подписки",
+            vlessLink: "Ссылка VLESS",
+            subUrl: "URL подписки",
+            copy: "Копировать",
+            lastUpdated: "Последнее обновление",
+            autoRefresh: "Автообновление: 15с",
+            theme: "Тема",
+            dark: "Темная",
+            light: "Светлая",
+            language: "Язык",
+            copied: "Скопировано!",
+            dataUpdated: "Данные обновлены!",
+            copyFailed: "Ошибка копирования",
+            en: "🇬🇧 English",
+            ru: "🇷🇺 Русский",
+            zh: "🇨🇳 中文",
+            fa: "🇮🇷 فارسی"
+        },
+        zh: {
+            title: "AegisVLESS 控制面板",
+            currentSni: "当前 SNI",
+            currentPort: "当前端口",
+            sniMode: "SNI 选择模式",
+            portMode: "端口选择模式",
+            subPath: "订阅路径",
+            vlessLink: "VLESS 链接",
+            subUrl: "订阅 URL",
+            copy: "复制",
+            lastUpdated: "最后更新",
+            autoRefresh: "自动刷新：15秒",
+            theme: "主题",
+            dark: "深色",
+            light: "浅色",
+            language: "语言",
+            copied: "已复制！",
+            dataUpdated: "数据已更新！",
+            copyFailed: "复制失败",
+            en: "🇬🇧 English",
+            ru: "🇷🇺 Русский",
+            zh: "🇨🇳 中文",
+            fa: "🇮🇷 فارسی"
+        },
+        fa: {
+            title: "پنل AegisVLESS",
+            currentSni: "SNI فعلی",
+            currentPort: "پورت فعلی",
+            sniMode: "حالت انتخاب SNI",
+            portMode: "حالت انتخاب پورت",
+            subPath: "مسیر اشتراک",
+            vlessLink: "لینک VLESS",
+            subUrl: "آدرس اشتراک",
+            copy: "کپی",
+            lastUpdated: "آخرین به‌روزرسانی",
+            autoRefresh: "به‌روزرسانی خودکار: 15 ثانیه",
+            theme: "تم",
+            dark: "تیره",
+            light: "روشن",
+            language: "زبان",
+            copied: "کپی شد!",
+            dataUpdated: "داده‌ها به‌روزرسانی شدند!",
+            copyFailed: "کپی ناموفق",
+            en: "🇬🇧 English",
+            ru: "🇷🇺 Русский",
+            zh: "🇨🇳 中文",
+            fa: "🇮🇷 فارسی"
+        }
+    };
+
+    window.getLanguage = function() {
+        return localStorage.getItem('aegisvless-lang') || 'en';
+    };
+
+    window.setLanguage = function(lang) {
+        localStorage.setItem('aegisvless-lang', lang);
+        window.applyTranslations(lang);
+    };
+
+    window.applyTranslations = function(lang) {
+        const t = window.translations[lang] || window.translations.en;
+
+        function updateElement(id, property, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element[property] = value;
+                return true;
+            }
+            return false;
+        }
+
+        updateElement('dashboard-title-text', 'textContent', t.title);
+        updateElement('label-current-sni', 'textContent', t.currentSni);
+        updateElement('label-current-port', 'textContent', t.currentPort);
+        updateElement('label-sni-mode', 'textContent', t.sniMode);
+        updateElement('label-port-mode', 'textContent', t.portMode);
+        updateElement('label-sub-path', 'textContent', t.subPath);
+        updateElement('label-vless-link', 'textContent', t.vlessLink);
+        updateElement('label-sub-url', 'textContent', t.subUrl);
+        updateElement('footer-last-updated', 'textContent', t.lastUpdated);
+        updateElement('refresh-text', 'textContent', t.autoRefresh);
+
+        const copyBtns = document.querySelectorAll('.copy-btn span');
+        for (let i = 0; i < copyBtns.length; i++) {
+            copyBtns[i].textContent = t.copy;
+        }
+
+        updateElement('settings-title-theme', 'textContent', t.theme);
+        updateElement('settings-title-language', 'textContent', t.language);
+        updateElement('theme-btn-dark', 'textContent', t.dark);
+        updateElement('theme-btn-light', 'textContent', t.light);
+
+        updateElement('lang-btn-en', 'innerHTML', t.en);
+        updateElement('lang-btn-ru', 'innerHTML', t.ru);
+        updateElement('lang-btn-zh', 'innerHTML', t.zh);
+        updateElement('lang-btn-fa', 'innerHTML', t.fa);
+    };
+
+    window.setTheme = function(theme) {
+        if (theme === "light") {
+            document.body.classList.add("light");
+        } else {
+            document.body.classList.remove("light");
+        }
+        localStorage.setItem("theme", theme);
+    };
+
+    window.loadTheme = function() {
+        const saved = localStorage.getItem("theme");
+        if (saved === "light") {
+            document.body.classList.add("light");
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "light") {
+            document.documentElement.classList.add("light");
+        }
+
+        const savedLang = window.getLanguage();
+        window.applyTranslations(savedLang);
+    });
+</script>
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    margin: 0;
+    padding: 40px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: white;
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+    position: relative;
+}
+body.light {
+    background: linear-gradient(135deg, #f1f5f9, #dbeafe);
+    color: #111827;
+}
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image:
+        radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+        radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+    background-size: 550px 550px, 350px 350px, 250px 250px;
+    background-position: 0 0, 40px 60px, 130px 270px;
+    animation: particles 30s linear infinite;
+    z-index: -1;
+}
+@keyframes particles {
+    0% { background-position: 0 0, 0 0, 0 0; }
+    100% {
+        background-position: 550px 550px,
+                           350px 350px,
+                           250px 250px;
+    }
+}
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+        linear-gradient(90deg, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 20px 20px;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+/* Добавляем max-height и overflow для прокрутки */
+.container {
+    max-width: 960px;
+    margin: auto;
+    padding: 34px;
+    border-radius: 30px;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(100, 100, 255, 0.2);
+    box-shadow:
+        0 10px 45px rgba(0, 0, 0, 0.45),
+        0 0 30px rgba(100, 100, 255, 0.2);
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    position: relative;
+    overflow: hidden;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+/* Стили для скроллбара */
+.container::-webkit-scrollbar {
+    width: 8px;
+}
+.container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+.container::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5);
+    border-radius: 4px;
+}
+.container::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.7);
+}
+
+.container::before, .container::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(100, 100, 255, 0.3);
+    z-index: -1;
+}
+.container::before {
+    top: 20px;
+    right: 20px;
+    animation: float 6s ease-in-out infinite;
+}
+.container::after {
+    bottom: 20px;
+    left: 20px;
+    animation: float 8s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(10px, 15px); }
+    50% { transform: translate(0, 20px); }
+    75% { transform: translate(-15px, 10px); }
+}
+body.light .container {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.45);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+}
+.container:hover {
+    transform: translateY(-5px) rotateX(2deg);
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(100, 100, 255, 0.3);
+}
+h1 {
+    margin-top: 0;
+    margin-bottom: 32px;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.aegis-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.7);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+}
+.aegis-icon {
+    width: 22px;
+    height: 22px;
+    stroke: white;
+    stroke-width: 1.5;
+    fill: none;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.7); }
+    50% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.9); }
+    100% { box-shadow: 0 0 15px rgba(139, 92, 246, 0.7); }
+}
+.info-block {
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.3s ease;
+    transform: translateY(0);
+}
+body.light .info-block {
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.info-block:hover {
+    transform: translateY(-3px);
+    border-bottom: 1px solid rgba(100, 100, 255, 0.4);
+}
+.label {
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    opacity: 0.65;
+}
+.value {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    color: white;
+    font-size: 14px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+.value:hover {
+    border: 1px solid rgba(100, 100, 255, 0.5);
+    box-shadow: 0 0 10px rgba(100, 100, 255, 0.3);
+}
+body.light .value {
+    background: rgba(0,0,0,0.05);
+    color: #111827;
+}
+.link-container {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+.link-box {
+    flex: 1;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.22);
+    line-height: 1.5;
+    word-break: break-word;
+    font-size: 14px;
+    font-family: "SFMono-Regular", monospace;
+    transition: all 0.3s ease;
+    min-width: 0;
+}
+.link-box:hover {
+    border-color: rgba(99,102,241,0.4);
+    box-shadow: 0 0 10px rgba(99,102,241,0.2);
+}
+body.light .link-box {
+    background: rgba(99,102,241,0.08);
+    color: #111827;
+}
+
+/* Кнопка копирования с плавным переливом */
+.copy-btn {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    border-radius: 16px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 100px;
+
+    /* Плавные переходы для анимации цвета */
+    transition: background 0.5s ease, box-shadow 0.5s ease, transform 0.15s ease;
+
+    /* Исходный фиолетовый градиент */
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    box-shadow:
+        0 4px 18px rgba(99, 102, 241, 0.35),
+        0 0 15px rgba(139, 92, 246, 0.2);
+    animation: glow 3s infinite alternate;
+}
+@keyframes glow {
+    from { box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35), 0 0 10px rgba(139, 92, 246, 0.1); }
+    to { box-shadow: 0 4px 18px rgba(99, 102, 241, 0.5), 0 0 20px rgba(139, 92, 246, 0.3); }
+}
+.copy-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+    box-shadow:
+        0 6px 22px rgba(99, 102, 241, 0.45),
+        0 0 25px rgba(139, 92, 246, 0.4);
+}
+.copy-btn:active {
+    transform: scale(0.97);
+}
+
+/* Состояние после копирования - плавный перелив в зеленый */
+.copy-btn.copied-state {
+    /* Плавный переход уже задан в основном классе */
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow:
+        0 4px 18px rgba(34, 197, 94, 0.4),
+        0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.settings-menu {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+}
+.settings-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow:
+        0 6px 22px rgba(0,0,0,0.3),
+        0 0 15px rgba(100, 100, 255, 0.1);
+    color: white !important;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    animation: settingsGlow 4s infinite alternate;
+}
+@keyframes settingsGlow {
+    from { box-shadow: 0 6px 22px rgba(0,0,0,0.3), 0 0 10px rgba(100, 100, 255, 0.1); }
+    to { box-shadow: 0 6px 22px rgba(0,0,0,0.3), 0 0 20px rgba(100, 100, 255, 0.3); }
+}
+.settings-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.18) !important;
+    box-shadow:
+        0 8px 28px rgba(0,0,0,0.4),
+        0 0 25px rgba(100, 100, 255, 0.4);
+}
+.settings-btn:active {
+    transform: scale(0.95);
+}
+body.light .settings-btn {
+    color: #1f2937 !important;
+    background: rgba(255,255,255,0.9) !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.15);
+}
+body.light .settings-btn:hover {
+    background: rgba(255,255,255,1) !important;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+}
+.settings-dropdown {
+    display: none;
+    position: absolute;
+    top: 66px;
+    right: 0;
+    width: 220px;
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(15,23,42,0.95);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow:
+        0 12px 40px rgba(0,0,0,0.4),
+        0 0 25px rgba(100, 100, 255, 0.2);
+}
+body.light .settings-dropdown {
+    background: rgba(255,255,255,0.88);
+}
+.settings-title {
+    margin-bottom: 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.6;
+}
+.settings-section {
+    margin-bottom: 14px;
+}
+.theme-btn {
+    width: 100%;
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: white !important;
+    box-shadow:
+        0 4px 18px rgba(99,102,241,0.35),
+        0 0 10px rgba(139, 92, 246, 0.2);
+}
+.theme-btn:last-child {
+    margin-bottom: 0;
+}
+.theme-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+    box-shadow:
+        0 6px 22px rgba(99,102,241,0.45),
+        0 0 15px rgba(139, 92, 246, 0.3);
+}
+.theme-btn:active {
+    transform: scale(0.97);
+}
+body.light .theme-btn {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: white !important;
+    box-shadow:
+        0 4px 18px rgba(99,102,241,0.35),
+        0 0 10px rgba(139, 92, 246, 0.2);
+}
+body.light .theme-btn:hover {
+    box-shadow:
+        0 6px 22px rgba(99,102,241,0.45),
+        0 0 15px rgba(139, 92, 246, 0.3);
+}
+.footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.55;
+    padding-bottom: 20px;
+}
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 24px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4);
+    z-index: 99999;
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.refresh-indicator {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(100, 100, 255, 0.3);
+}
+.refresh-indicator.visible {
+    opacity: 0.7;
+    animation: scan 2s linear infinite;
+}
+@keyframes scan {
+    0% { border-color: rgba(100, 100, 255, 0.3); }
+    50% { border-color: rgba(100, 100, 255, 0.7); }
+    100% { border-color: rgba(100, 100, 255, 0.3); }
+}
+.refresh-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+@media (max-width: 700px) {
+    body {
+        padding: 18px;
+    }
+    .container {
+        padding: 24px;
+        border-radius: 24px;
+        max-height: calc(100vh - 80px);
+    }
+    h1 {
+        font-size: 28px;
+    }
+    .link-container {
+        flex-direction: column;
+    }
+    .copy-btn {
+        width: 100%;
+    }
+}
+
+/* --- НОВЫЙ КОД НИЖЕ --- */
+/* Для ПК (экраны шире 700px) убираем фиксированную высоту и скролл внутри контейнера */
+@media (min-width: 701px) {
+    .container {
+        max-height: none;
+        overflow: visible;
+    }
+}
+</style>
+</head>
+<body class="">
+<div class="refresh-indicator" id="refreshIndicator">
+    <div class="refresh-dot"></div>
+    <span id="refresh-text">自动刷新：15秒</span>
+</div>
+<div class="settings-menu">
+    <button class="settings-btn" type="button" onclick="toggleMenu()">⚙</button>
+    <div class="settings-dropdown" id="settingsDropdown" style="display: none;">
+        <div class="settings-section">
+            <div class="settings-title" id="settings-title-theme">主题</div>
+            <button type="button" class="theme-btn" onclick="setTheme('dark')"><span id="theme-btn-dark">深色</span></button>
+            <button type="button" class="theme-btn" onclick="setTheme('light')"><span id="theme-btn-light">浅色</span></button>
+        </div>
+        <div class="settings-section">
+            <div class="settings-title" id="settings-title-language">语言</div>
+            <button type="button" class="theme-btn" onclick="setLanguage('en')"><span id="lang-btn-en">🇬🇧 English</span></button>
+            <button type="button" class="theme-btn" onclick="setLanguage('ru')"><span id="lang-btn-ru">🇷🇺 Русский</span></button>
+            <button type="button" class="theme-btn" onclick="setLanguage('zh')"><span id="lang-btn-zh">🇨🇳 中文</span></button>
+            <button type="button" class="theme-btn" onclick="setLanguage('fa')"><span id="lang-btn-fa">🇮🇷 فارسی</span></button>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <h1 id="dashboard-title">
+        <span class="aegis-logo">
+            <svg class="aegis-icon" viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+        </span>
+        <span id="dashboard-title-text">AegisVLESS 控制面板</span>
+    </h1>
+    <div class="info-block">
+        <div class="label" id="label-current-sni">当前 SNI</div>
+        <div class="value" id="currentSni">{{CURRENT_SNI}}</div>
+    </div>
+    <div class="info-block">
+        <div class="label" id="label-current-port">当前端口</div>
+        <div class="value" id="currentPort">{{CURRENT_PORT}}</div>
+    </div>
+    <div class="info-block">
+        <div class="label" id="label-sni-mode">SNI 选择模式</div>
+        <div class="value">{{SNI_MODE}}</div>
+    </div>
+    <div class="info-block">
+        <div class="label" id="label-port-mode">端口选择模式</div>
+        <div class="value">{{PORT_MODE}}</div>
+    </div>
+    <div class="info-block">
+        <div class="label" id="label-sub-path">订阅路径</div>
+        <div class="value">/{{SECRET_PATH}}</div>
+    </div>
+    <div class="info-block">
+        <div class="label" id="label-vless-link">VLESS 链接</div>
+        <div class="link-container">
+            <div class="link-box" id="vless-link">{{VLESS_LINK}}</div>
+            <button type="button" id="btn-vless" class="copy-btn" onclick="copyText('vless-link', this)"><span>复制</span></button>
+        </div>
+    </div>
+    <div class="info-block">
+        <div class="label" id="label-sub-url">订阅 URL</div>
+        <div class="link-container">
+            <div class="link-box" id="sub-link">{{SUBSCRIPTION_URL}}</div>
+            <button type="button" id="btn-sub" class="copy-btn" onclick="copyText('sub-link', this)"><span>复制</span></button>
+        </div>
+    </div>
+    <div class="footer"><span id="footer-last-updated">最后更新</span> <span id="lastUpdate">{{LAST_UPDATE_TIME}}</span></div>
+</div>
+<div class="toast" id="toast">Copied!</div>
+<script>
+var originalData = {
+    sni: '{{CURRENT_SNI}}',
+    port: '{{CURRENT_PORT}}',
+    vless: '{{VLESS_LINK}}',
+    sub: '{{SUBSCRIPTION_URL}}',
+    updated: '{{LAST_UPDATE_TIME}}'
+};
+
+function toggleMenu() {
+    var menu = document.getElementById("settingsDropdown");
+    if (menu.style.display === "block") {
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
+    }
+}
+
+window.copyText = function(id, btnElement) {
+    if (!btnElement || !document.getElementById(id)) return;
+
+    var textElement = document.getElementById(id);
+    var text = textElement.innerText;
+    var textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, 99999);
+
+    try {
+        document.execCommand("copy");
+
+        var span = btnElement.querySelector('span');
+        var originalText = span ? span.innerText : btnElement.innerText;
+
+        // Добавляем класс для зеленого цвета - теперь с плавным переходом!
+        btnElement.classList.add('copied-state');
+
+        var lang = localStorage.getItem('aegisvless-lang') || 'en';
+        var t = window.translations[lang] || window.translations.en;
+
+        if (span) {
+            span.innerText = t.copied;
+        } else {
+            btnElement.innerText = t.copied;
+        }
+
+        // Удаляем класс через 1.2 секунды
+        setTimeout(function() {
+            btnElement.classList.remove('copied-state');
+            if (span) {
+                span.innerText = originalText;
+            } else {
+                btnElement.innerText = originalText;
+            }
+        }, 1200);
+    } catch (err) {
+        console.error("Copy error:", err);
+        var lang = localStorage.getItem('aegisvless-lang') || 'en';
+        var t = window.translations[lang] || window.translations.en;
+        showToast(t.copyFailed);
+    } finally {
+        if (textarea && textarea.parentNode) {
+            textarea.parentNode.removeChild(textarea);
+        }
+    }
+};
+
+function showToast(key) {
+    var lang = localStorage.getItem('aegisvless-lang') || 'en';
+    var t = window.translations[lang] || window.translations.en;
+    var message = t[key] || key;
+
+    var toast = document.getElementById('toast');
+    toast.innerText = message;
+    toast.classList.add('show');
+    setTimeout(function() {
+        toast.classList.remove('show');
+    }, 2000);
+}
+
+var AUTO_REFRESH_INTERVAL = 15000;
+var refreshTimeout = null;
+
+function startAutoRefresh() {
+    var indicator = document.getElementById('refreshIndicator');
+
+    refreshTimeout = setInterval(function() {
+        try {
+            indicator.classList.add('visible');
+
+            var response = fetch(window.location.href);
+            response.then(function(res) {
+                return res.text();
+            }).then(function(html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+
+                var newSni = doc.getElementById('currentSni').textContent.trim();
+                var newPort = doc.getElementById('currentPort').textContent.trim();
+                var newVless = doc.getElementById('vless-link').textContent.trim();
+                var newSub = doc.getElementById('sub-link').textContent.trim();
+                var newUpdated = doc.getElementById('lastUpdate').textContent.trim();
+
+                if (newSni !== originalData.sni || newPort !== originalData.port) {
+                    document.getElementById('currentSni').textContent = newSni;
+                    document.getElementById('currentPort').textContent = newPort;
+                    document.getElementById('vless-link').textContent = newVless;
+                    document.getElementById('sub-link').textContent = newSub;
+                    document.getElementById('lastUpdate').textContent = newUpdated;
+
+                    originalData = {
+                        sni: newSni,
+                        port: newPort,
+                        vless: newVless,
+                        sub: newSub,
+                        updated: newUpdated
+                    };
+
+                    var lang = localStorage.getItem('aegisvless-lang') || 'en';
+                    var t = window.translations[lang] || window.translations.en;
+                    showToast('dataUpdated');
+                }
+
+                setTimeout(function() {
+                    indicator.classList.remove('visible');
+                }, 500);
+            }).catch(function(e) {
+                console.error('Auto-refresh error:', e);
+                indicator.classList.remove('visible');
+            });
+
+        } catch (e) {
+            console.error('Auto-refresh error:', e);
+            indicator.classList.remove('visible');
+        }
+
+    }, AUTO_REFRESH_INTERVAL);
+}
+
+window.onload = function() {
+    window.loadTheme();
+    var savedLang = window.getLanguage();
+    if (window.translations && window.translations[savedLang]) {
+        window.applyTranslations(savedLang);
+    }
+    startAutoRefresh();
+};
+
+window.onbeforeunload = function() {
+    if (refreshTimeout) {
+        clearInterval(refreshTimeout);
+    }
+};
+</script>
+
+
+
+</body></html>
