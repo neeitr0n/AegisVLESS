@@ -65,9 +65,9 @@ graph TD
 3. **Service Management:**
    ```bash
    sudo systemctl status aegis       # Check service status
-
-> <b>Инструмент был полезен? Поставь ⭐ в качестве «спасибо»!</b><br>
-
    sudo journalctl -u aegis -f       # View live logs
    sudo python3 aegis.py -menu       # Access configuration menu
    ```
+
+   > <b>Was this tool helpful? Give it a ⭐ as a "thank you"!</b><br>
+   
