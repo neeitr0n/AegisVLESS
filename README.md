@@ -1,4 +1,4 @@
-https://github.com/user-attachments/assets/d4b10fbf-20be-42e8-af7f-07955d572025
+<img width="1440" height="1080" alt="video (2)" src="https://github.com/user-attachments/assets/0ac4d808-da46-49be-892c-4f490b210310" />
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python">
@@ -14,7 +14,6 @@ https://github.com/user-attachments/assets/d4b10fbf-20be-42e8-af7f-07955d572025
 ### 📖 Documentation
 
 [English](readme-en.md) | [Русский](readme-ru.md) | [简体中文](readme-zh.md) | [فارسى](readme-fa.md)
-
 
 ---
 
