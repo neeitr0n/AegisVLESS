@@ -1,10 +1,11 @@
-<img width="1440" height="1080" alt="video (2)" src="https://github.com/user-attachments/assets/0ac4d808-da46-49be-892c-4f490b210310" />
+<img width="451" height="419" alt="2026-05-10_21-34" src="https://github.com/user-attachments/assets/aa1e0f53-8a78-45cf-bf20-1f5023bd7b67" />
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python" alt="Python">
   <img src="https://img.shields.io/badge/OS-Linux-orange?style=for-the-badge&logo=linux" alt="OS">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/Status-Stable-brightgreen?style=for-the-badge"
+ alt="Status">
 </p>
 
 > **Automated VLESS Reality management daemon with dynamic SNI/port rotation for X-UI panels.**
