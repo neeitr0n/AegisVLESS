@@ -34,6 +34,7 @@
 ### 🛠 Quick Install
 
 ```bash
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
 git clone https://github.com/neeitr0n/AegisVLESS.git
 cd AegisVLESS
 chmod +x aegis.py
