@@ -9,18 +9,20 @@ import datetime
 import threading
 import time
 import re
-import string 
+import string
 import argparse
 import shutil
-import textwrap 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import textwrap
+import hashlib
+from urllib.parse import urlparse
+from http.server import BaseHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 
 # --- Configuration ---
 
-SNI_SELECTION_MODE = "" # "best_ping" or "random_sni";  best_ping = finds lowest latency ; random_sni = random choice from pool
-PORT_SELECTION_MODE = "" # "dynamic" or "standard";       dynamic = dynamic random ports (42k-65k) ; standard = common web ports e.g 80, 443, 2053 and other
-MY_REMARK = ""
-SECRET_PATH = ""
+SNI_SELECTION_MODE = "best_ping" # "best_ping" or "random_sni";  best_ping = finds lowest latency ; random_sni = random choice from pool
+PORT_SELECTION_MODE = "dynamic" # "dynamic" or "standard";       dynamic = dynamic random ports (42k-65k) ; standard = common web ports e.g 80, 443, 2053 and other
+MY_REMARK = "vpn1"
+SECRET_PATH = "/egynmqDU5b5ZsNjhEZM9HizX7DGCQQno"
 
 STANDARD_PORTS = [
 
@@ -32,6 +34,21 @@ STANDARD_PORTS = [
 ]
 
 ALLOWED = string.ascii_letters + string.digits
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+GUI_DIR = os.path.join(SCRIPT_DIR, "gui")
+CONFIG_FILE = os.path.join(GUI_DIR, "config.json")
+
+DEFAULT_CONFIG = {
+
+    "webui_enabled": False,
+    "webui_username": "",
+    "webui_password_hash": "",
+    "first_setup_completed": False
+
+}
+
+ACTIVE_SESSIONS = set()
 
 # ---------------------
 
@@ -54,14 +71,14 @@ def ensure_firewall_port(port):
 def close_firewall_port(port):
     try:
         check_status = subprocess.check_output(["sudo", "ufw", "status"]).decode()
-        
+
         if str(port) in check_status:
             print(f"[Firewall] Port {port} is no longer needed. Closing...")
             subprocess.run(["sudo", "ufw", "delete", "allow", f"{port}/tcp"], check=True, capture_output=True)
             print(f"[Firewall] Port {port} closed successfully.")
 
     except Exception as e:
-        print(f"[Warning] Failed to close old port {port}: {e}")        
+        print(f"[Warning] Failed to close old port {port}: {e}")
 
 def rotation_worker(sur, nav, db_file, remark):
     temp_remark = f"{remark}_migration"
@@ -79,7 +96,7 @@ def rotation_worker(sur, nav, db_file, remark):
         time.sleep(wait_seconds)
 
         print("\n[Scheduler] Time's up! Starting scheduled rotation...")
-        
+
         if SNI_SELECTION_MODE == "best_ping":
             new_sni = nav.get_best_sni()
         elif SNI_SELECTION_MODE == "random_sni":
@@ -104,6 +121,7 @@ def rotation_worker(sur, nav, db_file, remark):
 
                     new_link = sur.generate_vless_link(port_in, proxy_settings, net_settings, remark)
                     SubscriptionHandler.vless_link = new_link
+                    generate_panel_html_file(sur, db_file, temp_remark)
 
                     print(f"[Scheduler] Subscription updated to new port {port_in}. Waiting for clients to migrate...")
 
@@ -114,13 +132,24 @@ def rotation_worker(sur, nav, db_file, remark):
                 sur.rename_inbound(db_file, temp_remark, remark)
 
                 subprocess.run(["x-ui", "restart"], check=True)
+
+                inbound_data = sur.get_inbound_info(db_file, remark)
+                if inbound_data:
+                    id_in, port_in, proxy_settings, net_settings = inbound_data
+                    new_link = sur.generate_vless_link(port_in, proxy_settings, net_settings, temp_remark)
+                    SubscriptionHandler.vless_link = new_link
+                    generate_panel_html_file(sur, db_file, remark)
+                    print(f"[Panel] HTML file updated after rotation with new port {port_in}")
+
                 print(f"[Scheduler] Seamless migration complete. Port {new_port} is now primary.")
 
             except Exception as e:
-                print(f"[Scheduler] Error during migration steps: {e}")    
+                print(f"[Scheduler] Error during migration steps: {e}")
 
 def first_time_setup():
     global SNI_SELECTION_MODE, PORT_SELECTION_MODE, MY_REMARK, SECRET_PATH
+
+    config = load_config()
 
     while True:
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -210,6 +239,68 @@ def first_time_setup():
         print_box(["Invalid choice - please enter 1 or 2."])
         input("Press Enter to continue...")
 
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+    print_box([
+        "WebUI Configuration",
+        "",
+        "Enable WebUI Panel?",
+        "",
+        "[1] Yes",
+        "[2] No"
+    ])
+
+    choice = input(">>> ").strip()
+
+    if choice == "1":
+        config["webui_enabled"] = True
+
+        while True:
+
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print_box([
+                "Enter WebUI username",
+                "",
+                "English letters/numbers only"
+            ])
+            username = input(">>> ").strip()
+
+            if not username:
+                print_box(["Username cannot be empty"])
+                input("Press Enter to continue...")
+                continue
+
+            if not is_english_text(username):
+                print_box(["Only English letters/numbers allowed"])
+                input("Press Enter to continue...")
+                continue
+
+            break
+
+        while True:
+
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print_box([
+                "Enter WebUI password"
+            ])
+            password = input(">>> ").strip()
+            if len(password) < 4:
+                print_box([
+                    "Password must contain at least 4 characters"
+                ])
+                input("Press Enter to continue...")
+                continue
+            break
+
+        config["webui_username"] = username
+        config["webui_password_hash"] = hash_password(password)
+
+    else:
+
+        config["webui_enabled"] = False
+    config["first_setup_completed"] = True
+    save_config(config)
+
     script_path = os.path.abspath(__file__)
     try:
         with open(script_path, 'r') as f:
@@ -252,6 +343,93 @@ def generate_secure_path(length=32):
     random_path = ''.join(random.choice(ALLOWED) for _ in range(length))
     return f"/{random_path}"
 
+def generate_panel_html_file(surgeon, db_path, remark):
+    try:
+        inbound_data = surgeon.get_inbound_info(db_path, remark)
+        if not inbound_data:
+            print("[Panel] Warning: Could not fetch inbound data for HTML generation.")
+            return False
+
+        inbound_id, port, proxy_settings, net_settings = inbound_data
+
+        current_sni = net_settings.get('realitySettings', {}).get('serverNames', ['N/A'])[0]
+        current_sid = net_settings.get('realitySettings', {}).get('shortIds', ['N/A'])[0]
+        vless_link = surgeon.generate_vless_link(port, proxy_settings, net_settings, remark)
+
+        ip_cmd = subprocess.check_output(["curl", "-s", "ifconfig.me"]).decode().strip()
+        subscription_url = (f"http://{ip_cmd}:8080{SubscriptionHandler.secret_path}")
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        template_path = os.path.join(script_dir,"gui", "index_template.html")
+
+        if not os.path.exists(template_path):
+            print(f"[Panel] Error: Template file not found at {template_path}")
+            return False
+
+        with open(template_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+
+        from datetime import datetime
+        replacements = {
+            "{{CURRENT_SNI}}": current_sni,
+            "{{CURRENT_PORT}}": str(port),
+            "{{SNI_MODE}}": SNI_SELECTION_MODE,
+            "{{PORT_MODE}}": PORT_SELECTION_MODE,
+            "{{SECRET_PATH}}": SECRET_PATH.lstrip("/"),
+            "{{VLESS_LINK}}": vless_link,
+            "{{SUBSCRIPTION_URL}}": subscription_url,
+            "{{LAST_UPDATE_TIME}}": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        for key, value in replacements.items():
+            html_content = html_content.replace(key, value)
+
+        output_path = os.path.join(script_dir, "gui", "index_data.html")
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        print(f"[Panel] HTML file generated successfully: {output_path}")
+        return True
+
+    except Exception as e:
+        print(f"[Panel] Error generating HTML: {e}")
+        return False
+
+def save_config(config):
+    os.makedirs(GUI_DIR, exist_ok=True)
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4)
+
+def load_config():
+    os.makedirs(GUI_DIR, exist_ok=True)
+
+    if not os.path.exists(CONFIG_FILE):
+        save_config(DEFAULT_CONFIG)
+        return DEFAULT_CONFIG.copy()
+
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        for key, value in DEFAULT_CONFIG.items():
+            if key not in config:
+                config[key] = value
+        return config
+
+    except Exception:
+        save_config(DEFAULT_CONFIG)
+        return DEFAULT_CONFIG.copy()
+
+def hash_password(password: str):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def is_english_text(text: str):
+    allowed = string.ascii_letters + string.digits + "_-"
+    return all(c in allowed for c in text)
+
+def generate_session_token(length=64):
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choice(chars) for _ in range(length))
+
 def sanitize_path(raw_path: str) -> str:
     cleaned = "".join(ch for ch in raw_path.lstrip("/") if ch in ALLOWED)
 
@@ -287,7 +465,7 @@ def print_box(lines: list):
         print(_line(line, inner))
     print(_border(inner, top=False))
 
-class Surgeon: 
+class Surgeon:
     def __init__(self):
         pass
 
@@ -321,13 +499,13 @@ class Surgeon:
             else:
                 print(f"Error! Server ({remark_name}) not founded!")
                 return None
-        
+
         except Exception as e:
-            print(f"Error occured while reading the database: {e}")    
+            print(f"Error occured while reading the database: {e}")
         finally:
             if conn:
-                conn.close()  
-    
+                conn.close()
+
     def update_inbound(self, db_path, inbound_id, new_port, settings, new_sni, new_sid):
         try:
             if isinstance(new_sni, dict) and isinstance(settings, str):
@@ -355,11 +533,11 @@ class Surgeon:
             conn.commit()
             print(f"[Surgeon] Database updated: ID: {inbound_id} -> Port: {new_port}, SNI Domain: {new_sni}, SID: {new_sid}")
             return True
-        
+
         except Exception as e:
             print(f"[Surgeon] Critical update error: {e}")
             return False
-        
+
         finally:
             if conn:
                 conn.close()
@@ -368,7 +546,7 @@ class Surgeon:
         try:
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
-            
+
             cursor.execute("DELETE FROM inbounds WHERE remark = ? OR tag = ?", (temp_remark, temp_remark))
 
             cursor.execute("SELECT up, down, total, remark, enable, expiry_time, listen, port, protocol, settings, stream_settings, tag, sniffing from inbounds WHERE remark = ?", (original_remark,))
@@ -392,9 +570,9 @@ class Surgeon:
                     if client['email'].endswith('_mig'):
                         client['email'] = client['email'][:-4]
                     else:
-                        client['email'] = f"{client['email']}_mig"  
+                        client['email'] = f"{client['email']}_mig"
 
-            row[9] = json.dumps(proxy_settings)        
+            row[9] = json.dumps(proxy_settings)
 
             placeholders = ','.join(["?"] * len(row))
             query = f"INSERT INTO inbounds (up, down, total, remark, enable, expiry_time, listen, port, protocol, settings, stream_settings, tag, sniffing) VALUES ({placeholders})"
@@ -403,7 +581,7 @@ class Surgeon:
             conn.commit()
             print(f"[Surgeon] Inbound Clone created: {temp_remark} on port {new_port}")
             return True
-        
+
         except Exception as e:
             print(f"[Surgeon] Clone error: {e}")
             return False
@@ -426,7 +604,7 @@ class Surgeon:
 
             print(f"[Surgeon] Inbound deleted: {remark_name}")
             return True
-        
+
         except Exception as e:
             print(f"[Surgeon] Delete error: {e}")
         finally:
@@ -442,11 +620,11 @@ class Surgeon:
 
             print(f"[Surgeon] Renamed: {old_remark} -> {new_remark}")
             return True
-        
+
         except Exception as e:
             print(f"[Surgeon] Rename error: {e}")
             return False
-        finally:    
+        finally:
             conn.close()
 
     def generate_vless_link(self, port, proxy_settings, network_settings, remark, nav=None):
@@ -470,7 +648,7 @@ class Surgeon:
                     noise_params += "&padding=1"
 
             else:
-                noise_params = "&fp=chrome"        
+                noise_params = "&fp=chrome"
 
             current_time = datetime.datetime.now().strftime("%H:%M")
             new_remark = f"{remark}_{current_time}"
@@ -478,7 +656,7 @@ class Surgeon:
             link = f"vless://{user_uuid}@{server_ip}:{port}?type=tcp&encryption=none&security=reality&sni={sni}{noise_params}&pbk={pbk}&sid={sid}#{new_remark}"
 
             return link
-        
+
         except Exception as e:
             print(f"[Surgeon] Link creating error: {e}")
             return None
@@ -524,7 +702,7 @@ WantedBy=multi-user.target
         if not os.path.exists("/etc/systemd/system/aegis.service"):
             print("[!] The service must be registered first.")
             return
-        
+
         action = "enable" if enabled else "disable"
 
         try:
@@ -543,15 +721,15 @@ WantedBy=multi-user.target
             service_path = "/etc/systemd/system/aegis.service"
             if os.path.exists(service_path):
                 os.remove(service_path)
-                
+
             subprocess.run(["systemctl", "daemon-reload"], check=False)
-            
+
             print("[System] Aegis service uninstalled successfully!")
             return True
-            
+
         except Exception as e:
             print(f"[Error] Failed to uninstall service: {e}")
-            return False            
+            return False
 
 class Navigator:
     def __init__(self, port_range=(49152,65535), max_attempts = 10):
@@ -578,10 +756,10 @@ class Navigator:
 
                 except socket.error:
                     print(f"[Navigator] Port {port} taken, trying next...")
-                    continue    
+                    continue
 
-        raise Exception(f"Failed to find an available port after {self.max_attempts} attempts.")  
-    
+        raise Exception(f"Failed to find an available port after {self.max_attempts} attempts.")
+
     def get_standard_port(self, current_port=None):
         candidates = [p for p in STANDARD_PORTS if p != current_port]
         random.shuffle(candidates)
@@ -599,12 +777,12 @@ class Navigator:
         selected = random.choice(self.sni_pool)
         print(f"[Navigator] SNI choosen: {selected}")
         return selected
-    
+
     def get_random_shortid(self):
         sid = "".join(random.choices("0123456789abcdef", k=8))
         print(f"[Navigator] New ShortID generated: {sid}")
         return sid
-    
+
     def get_noise_settings(self):
 
         fingerprints = ["chrome", "firefox", "safari", "edge", "qq"]
@@ -613,7 +791,7 @@ class Navigator:
             "padding": random.choice([True, False]),
             "seed": "".join(random.choices("0123456789abcdef", k=32))
         }
-    
+
     def get_best_sni(self):
         print(f"[Navigator] Analyzing SNI pool for best latency...")
         results = []
@@ -635,31 +813,168 @@ class Navigator:
 
         best_sni = min(results, key=lambda x: x[1])[0]
         print(f"[Navigator] Winner: {best_sni}")
-        return best_sni    
+        return best_sni
 
 class SubscriptionHandler(BaseHTTPRequestHandler):
-    
+
     vless_link = ""
     secret_path = SECRET_PATH if SECRET_PATH else generate_secure_path()
 
+    def send_json(self, data, status=200):
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+
+
+    def get_session_token(self):
+
+        cookie = self.headers.get("Cookie", "")
+        parts = cookie.split(";")
+
+        for part in parts:
+            part = part.strip()
+            if part.startswith("session="):
+                return part.split("=", 1)[1]
+
+        return None
+
+
+    def is_authenticated(self):
+        token = self.get_session_token()
+        return token in ACTIVE_SESSIONS
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        if parsed.path == "/login":
+            try:
+
+                length = int(self.headers.get("Content-Length", 0))
+                body = self.rfile.read(length).decode()
+                data = json.loads(body)
+                username = data.get("username", "").strip()
+                password = data.get("password", "").strip()
+                config = load_config()
+
+                if not config["webui_enabled"]:
+
+                    self.send_json({
+                        "success": False,
+                        "error": "WebUI disabled"
+                    }, 403)
+                    return
+
+                password_hash = hash_password(password)
+                if (
+                    username == config["webui_username"]
+                    and
+                    password_hash == config["webui_password_hash"]
+                ):
+
+                    token = generate_session_token()
+                    ACTIVE_SESSIONS.add(token)
+                    self.send_response(200)
+                    self.send_header(
+                        "Set-Cookie",
+                        f"session={token}; HttpOnly; Path=/"
+                    )
+                    self.send_header(
+                        "Content-Type",
+                        "application/json"
+                    )
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "success": True
+                    }).encode())
+                    print(f"[Auth] Successful login: {username}")
+
+                else:
+                    self.send_json({
+                        "success": False
+                    }, 401)
+                    print(f"[Auth] Failed login attempt")
+
+            except Exception as e:
+
+                print(f"[Auth] Login error: {e}")
+                self.send_json({
+                    "success": False
+                }, 500)
+
+        elif parsed.path == "/logout":
+            token = self.get_session_token()
+            if token in ACTIVE_SESSIONS:
+
+                ACTIVE_SESSIONS.remove(token)
+
+            self.send_response(200)
+            self.send_header(
+                "Set-Cookie",
+                "session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/"
+            )
+            self.end_headers()
+
     def do_GET(self):
-        
+        if self.path == "/login":
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            login_file = os.path.join(script_dir, "gui", "login.html")
+            if os.path.exists(login_file):
+
+                with open(login_file, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header(
+                    "Content-Type",
+                    "text/html; charset=utf-8"
+                )
+                self.end_headers()
+                self.wfile.write(content)
+
+            else:
+                self.send_error(404, "login.html not found")
+            return
+
         if self.path == self.secret_path:
-        
             encoded_content = base64.b64encode(self.vless_link.encode("utf-8")).decode("utf-8")
-            
             self.send_response(200)
             self.send_header("Content-type", "text/plain; charset=utf-8")
             self.end_headers()
-
             self.wfile.write(encoded_content.encode("utf-8"))
-            print(f"[Server] Subscription was delivered successfully: {self.client_address}")
+            print(f"[Server] Subscription delivered: {self.client_address}")
+
+        elif self.path == "/panel":
+            if not self.is_authenticated():
+
+                self.send_response(302)
+                self.send_header("Location", "/login")
+                self.end_headers()
+                return
+
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            panel_file = os.path.join(script_dir, "gui", "index_data.html")
+
+            if os.path.exists(panel_file):
+                with open(panel_file, 'rb') as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-type", "text/html; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(content)
+                print(f"[Server] Panel served: {self.client_address}")
+
+            else:
+                self.send_response(500)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                error_msg = "<h1>Error</h1><p>Panel file not found. Wait for rotation or check logs.</p>"
+                self.wfile.write(error_msg.encode())
+                print(f"[Server] Panel file missing for {self.client_address}")
 
         else:
             self.send_error(404, "Not Found")
 
     def log_message(self, format, *args):
-        return        
+        return
 
 class AegisManager:
     def __init__(self, surgeon, navigator, db_file, remark):
@@ -682,11 +997,13 @@ class AegisManager:
             "[3] Change Port Selection Mode",
             "[4] Change Inbound",
             "[5] Change Subscription Path",
-            "[6] Start Service",
-            "[7] Stop Service",
-            "[8] Restart Service",
-            "[9] Uninstall Service",
-            "[10] Exit"
+            "[6] Change WebUI Credentials",
+            "[7] Toggle WebUI",
+            "[8] Start Service",
+            "[9] Stop Service",
+            "[10] Restart Service",
+            "[11] Uninstall Service",
+            "[12] Exit"
         ]
 
         return [title, status, inbound, sni, port] + menu_items
@@ -731,20 +1048,22 @@ class AegisManager:
             self._print_box(info, inner)
 
             menu_items = [
-                "[1] Show Current Configuration",
-                "[2] Change SNI Selection Mode",
-                "[3] Change Port Selection Mode",
-                "[4] Change Inbound",
-                "[5] Change Subscription Path",
-                "[6] Start Service",
-                "[7] Stop Service",
-                "[8] Restart Service",
-                "[9] Uninstall Service",
-                "[10] Exit"
+            "[1] Show Current Configuration",
+            "[2] Change SNI Selection Mode",
+            "[3] Change Port Selection Mode",
+            "[4] Change Inbound",
+            "[5] Change Subscription Path",
+            "[6] Change WebUI Credentials",
+            "[7] Toggle WebUI",
+            "[8] Start Service",
+            "[9] Stop Service",
+            "[10] Restart Service",
+            "[11] Uninstall Service",
+            "[12] Exit"
             ]
             self._print_box(menu_items, inner)
 
-            choice = input("\n Enter your choice (1-10): ").strip()
+            choice = input("\n Enter your choice (1-14): ").strip()
 
             if choice == '1':
                 self.show_current_configuration()
@@ -762,18 +1081,24 @@ class AegisManager:
                 self.change_secret_path()
 
             elif choice == '6':
-                self.start_service()
+                self.change_webui_credentials()
 
             elif choice == '7':
-                self.stop_service()
+                self.toggle_webui()
 
             elif choice == '8':
-                self.restart_service()
+                self.start_service()
 
             elif choice == '9':
-                self.uninstall_service()
+                self.stop_service()
 
             elif choice == '10':
+                self.restart_service()
+
+            elif choice == '11':
+                self.uninstall_service()
+
+            elif choice == '12':
                 os.system('cls' if os.name == 'nt' else 'clear')
                 print("Goodbye!\n")
                 break
@@ -782,9 +1107,54 @@ class AegisManager:
                 print("Invalid choice. Please try again.")
                 input("Press 'Enter' to continue...")
 
+    def toggle_webui(self):
+
+        config = load_config()
+        config["webui_enabled"] = not config["webui_enabled"]
+        save_config(config)
+
+        state = "enabled" if config["webui_enabled"] else "disabled"
+        print(f"\n[WebUI] WebUI is now {state}")
+        input("\nPress Enter to continue...")
+
+
+    def change_webui_credentials(self):
+        config = load_config()
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print_box([
+            "Change WebUI Credentials"
+        ])
+
+        while True:
+            username = input("New username: ").strip()
+
+            if not username:
+                print("Username cannot be empty")
+                continue
+
+            if not is_english_text(username):
+                print("Only English letters/numbers allowed")
+                continue
+            break
+
+        while True:
+            password = input("New password: ").strip()
+
+            if len(password) < 4:
+                print("Password too short")
+                continue
+            break
+
+        config["webui_username"] = username
+        config["webui_password_hash"] = hash_password(password)
+        save_config(config)
+
+        print("\n[WebUI] Credentials updated successfully")
+        input("\nPress Enter to continue...")
+
     def show_current_configuration(self):
         inbound_data = self.sur.get_inbound_info(self.db_file, self.remark)
-        
+
         if inbound_data:
             id_in, port_in, proxy_in, net_in = inbound_data
 
@@ -819,7 +1189,7 @@ class AegisManager:
     def change_inbound_remark(self):
         global MY_REMARK
         print(f"Current inbound remark: {MY_REMARK}")
-        
+
         while True:
             new_remark = input("Enter new inbound remark name: ").strip()
             if new_remark:
@@ -836,13 +1206,13 @@ class AegisManager:
                 else:
                     print(f"[Error] Inbound '{new_remark}' not found in database!")
                     retry = input("Do you want to try again? (y/N): ").strip().lower()
-                    
+
                     if retry != 'y':
                         break
 
             else:
                 print("Inbound remark cannot be empty!")
-        
+
         input("\nPress Enter to continue...")
 
     def change_secret_path(self):
@@ -883,7 +1253,7 @@ class AegisManager:
 
     def check_service_status(self):
         try:
-            result = subprocess.run(["systemctl", "is-active", "aegis"], 
+            result = subprocess.run(["systemctl", "is-active", "aegis"],
                                 capture_output=True, text=True, check=False)
             return result.stdout.strip() == "active"
         except:
@@ -903,11 +1273,11 @@ class AegisManager:
         print("╚════════════════════════════════╝")
 
     def change_sni_mode(self):
-        global SNI_SELECTION_MODE        
+        global SNI_SELECTION_MODE
         print("Current SNI modes:")
         print("1. best_ping - Selects SNI with lowest latency")
         print("2. random_sni - Randomly selects SNI from pool")
-        
+
         choice = input("Select mode (1 or 2): ").strip()
         if choice == '1':
             self.update_config_in_code("SNI_SELECTION_MODE", "best_ping")
@@ -928,7 +1298,7 @@ class AegisManager:
         print("Current port modes:")
         print("1. dynamic - Uses Dynamic ports (49152-65535)")
         print("2. standard - Uses Standard Web ports (80, 443, etc.)")
-        
+
         choice = input("Select mode (1 or 2): ").strip()
         if choice == '1':
             self.update_config_in_code("PORT_SELECTION_MODE", "dynamic")
@@ -964,25 +1334,25 @@ class AegisManager:
     def update_config_in_code(self, var_name, new_value):
         try:
             script_path = os.path.abspath(__file__)
-            
+
             with open(script_path, 'r') as f:
                 content = f.read()
-            
+
             pattern = f'^({var_name}\\s*=\\s*)["\'][^"\']*["\']'
             replacement = f'\\1"{new_value}"'
             new_content = re.sub(pattern, replacement, content, flags=re.MULTILINE)
-            
+
             with open(script_path, 'w') as f:
                 f.write(new_content)
-                
+
             print(f"[Config] {var_name} permanently updated to '{new_value}'")
-            
+
         except Exception as e:
             print(f"[Error] Could not update configuration: {e}")
 
     def restart_service_quiet(self):
         try:
-            subprocess.run(["systemctl", "restart", "aegis"], 
+            subprocess.run(["systemctl", "restart", "aegis"],
                         capture_output=True, check=False)
             print("[Service] Restarted to apply new settings")
 
@@ -998,7 +1368,7 @@ class AegisManager:
         except Exception as e:
             print(f"[Error] Failed to start service: {e}")
 
-        input("\nPress 'Enter' to continue...")    
+        input("\nPress 'Enter' to continue...")
 
     def stop_service(self):
         try:
@@ -1023,7 +1393,7 @@ class AegisManager:
     def uninstall_service(self):
         confirm = input("Are you sure you want to uninstall Aegis service? (y/N): ").strip().lower()
         if confirm == 'y':
-        
+
             if self.sur.uninstall_service():
                 self.reset_config()
                 print("Service uninstalled successfully!")
@@ -1032,8 +1402,8 @@ class AegisManager:
 
         else:
             print("Uninstallation canceled.")
-        
-        input("\nPress 'Enter' to continue...")    
+
+        input("\nPress 'Enter' to continue...")
 
 if __name__ == "__main__":
 
@@ -1052,7 +1422,7 @@ if __name__ == "__main__":
         aegis_manager = AegisManager(sur, nav, DB_FILE, MY_REMARK)
         aegis_manager.show_menu()
         exit(0)
-    
+
     is_service = os.getenv("INVOCATION_ID") is not None
     service_exists = os.path.exists("/etc/systemd/system/aegis.service")
 
@@ -1065,21 +1435,21 @@ if __name__ == "__main__":
         first_time_setup()
 
         sur.register_as_service()
-   
+
         print("\n[System] First-time setup completed. Loading configuration...")
-        
+
         with open(__file__, 'r') as f:
             content = f.read()
-        
+
         import re
         sni_match = re.search(r'^SNI_SELECTION_MODE\s*=\s*"([^"]*)"', content, re.MULTILINE)
         port_match = re.search(r'^PORT_SELECTION_MODE\s*=\s*"([^"]*)"', content, re.MULTILINE)
         remark_match = re.search(r'^MY_REMARK\s*=\s*"([^"]*)"', content, re.MULTILINE)
-        
+
         SNI_SELECTION_MODE = sni_match.group(1) if sni_match else ""
         PORT_SELECTION_MODE = port_match.group(1) if port_match else ""
         MY_REMARK = remark_match.group(1) if remark_match else ""
-        
+
         print("[System] Configuration loaded, starting service...\n")
         subprocess.run(["sudo", "systemctl", "start", "aegis"], check=False)
 
@@ -1111,7 +1481,8 @@ if __name__ == "__main__":
             print("Current Subscription Data:")
             print("="*50)
             print(f"\nClient VLESS link: \n\n{link}")
-            print(f"\nSubscription Server URL: \n\n{sub_url}\n")
+            print(f"\nSubscription Server URL: \n\n{sub_url}")
+            print(f"\nAegisVLESS Dashboard: \n\n{sub_url}/panel\n")
             print("="*50)
 
 
@@ -1120,7 +1491,7 @@ if __name__ == "__main__":
         print("[!] To see logs, use: 'sudo journalctl -u aegis -f'\n")
         print("[!] For managment options, run with '-menu' argument:\n")
         print("[#] 'sudo python3 aegis.py -menu'\n")
-        exit(0)    
+        exit(0)
 
     inbound_data = sur.get_inbound_info(DB_FILE, MY_REMARK)
 
@@ -1130,7 +1501,7 @@ if __name__ == "__main__":
 
     if inbound_data:
         inbound_id, current_port, proxy_settings, current_network_settings = inbound_data
-        
+
         link = sur.generate_vless_link(current_port, proxy_settings, current_network_settings, MY_REMARK)
 
         print("\n[SUCCESS] Using existing configuration without changes.")
@@ -1143,6 +1514,8 @@ if __name__ == "__main__":
 
             ensure_firewall_port(SUB_PORT)
             SubscriptionHandler.vless_link = link
+
+            generate_panel_html_file(sur, DB_FILE, MY_REMARK)
 
             scheduler_thread = threading.Thread(
                 target=rotation_worker,
@@ -1160,5 +1533,5 @@ if __name__ == "__main__":
             print(f"Status: Waiting for connections... (Ctrl+C to stop)\n")
             print(f"---------------------------------------\n")
 
-            server = HTTPServer(('0.0.0.0', SUB_PORT), SubscriptionHandler)
+            server = ThreadingHTTPServer(('0.0.0.0', SUB_PORT), SubscriptionHandler)
             server.serve_forever()
